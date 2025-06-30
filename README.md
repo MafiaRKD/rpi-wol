@@ -15,7 +15,7 @@ Jednoduché a bezpečné webové rozhranie pre zapínanie viacerých počítačo
 
 ```bash
 sudo apt update
-sudo apt install wakeonlan python3-flask unzip -y
+sudo apt install wakeonlan python3-flask unzip git -y
 ```
 
 ### 2. Stiahnutie a spustenie
