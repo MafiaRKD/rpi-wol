@@ -3,8 +3,8 @@ Description=Wake-on-LAN Web Interface
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python3 /home/pi/wol-web/app.py
-WorkingDirectory=/home/pi/wol-web
+ExecStart=/usr/bin/python3 /home/pi/rpi-wol/app.py
+WorkingDirectory=/home/pi/rpi-wol
 Restart=always
 User=pi
 
