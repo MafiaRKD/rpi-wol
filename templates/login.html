@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+<head>
+    <title>Prihlásenie - Wake on LAN</title>
+</head>
+<body style="text-align: center; font-family: sans-serif;">
+    <h2>🔐 Prihlásenie</h2>
+    <form method="post">
+        <input type="text" name="username" placeholder="Meno" required><br><br>
+        <input type="password" name="password" placeholder="Heslo" required><br><br>
+        <button type="submit">Prihlásiť</button>
+    </form>
+    {% if error %}
+    <p style="color: red;">{{ error }}</p>
+    {% endif %}
+</body>
+</html>

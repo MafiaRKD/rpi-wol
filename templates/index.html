@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+<head>
+    <title>Wake on LAN</title>
+</head>
+<body style="text-align: center; font-family: sans-serif;">
+    <h1>🖥️ Zapnutie zariadení</h1>
+    {% for name, mac in devices.items() %}
+        <form action="/wake/{{ name }}">
+            <button style="font-size: 1.5em; margin: 10px;">Zapnúť {{ name }}</button>
+        </form>
+    {% endfor %}
+    <br>
+    <a href="/logout">Odhlásiť</a>
+</body>
+</html>
