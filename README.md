@@ -34,6 +34,10 @@ cd rpi-wol
 
 ```bash
 sudo cp wol-web.service /etc/systemd/system/
+sudo nano /etc/systemd/system/wol-web.service
+```
+zmen User="Tvoj Pi User"
+```bash
 sudo systemctl daemon-reexec
 sudo systemctl daemon-reload
 sudo systemctl enable wol-web
