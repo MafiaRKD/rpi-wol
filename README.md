@@ -36,9 +36,9 @@ cd rpi-wol
 sudo cp wol-web.service /etc/systemd/system/
 sudo nano /etc/systemd/system/wol-web.service
 ```
-zmen User="Tvoj Pi User"
-zmen ExecStart=/usr/bin/python3 /home/pi/wol-web/app.py - Tvoj Pi user
-zmen WorkingDirectory=/home/pi/wol-web - Tvoj Pi user
+- zmen User="Tvoj Pi User"
+- zmen ExecStart=/usr/bin/python3 /home/pi/rpi-wol/app.py - Tvoj Pi user
+- zmen WorkingDirectory=/home/pi/rpi-wol - Tvoj Pi user
 ```bash
 sudo systemctl daemon-reexec
 sudo systemctl daemon-reload
