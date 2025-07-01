@@ -1,16 +1,46 @@
 <!doctype html>
-<html>
+<html lang="sk">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wake on LAN</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 1.8em;
+            margin-bottom: 1em;
+        }
+        form {
+            margin: 10px;
+        }
+        button {
+            font-size: 1.2em;
+            padding: 1em;
+            width: 90%;
+            max-width: 300px;
+            margin: 0.5em auto;
+            display: block;
+        }
+        a {
+            display: block;
+            margin-top: 20px;
+            font-size: 1em;
+            color: #333;
+            text-decoration: none;
+        }
+    </style>
 </head>
-<body style="text-align: center; font-family: sans-serif;">
+<body>
     <h1>🖥️ Zapnutie zariadení</h1>
     {% for name, mac in devices.items() %}
         <form action="/wake/{{ name }}">
-            <button style="font-size: 1.5em; margin: 10px;">Zapnúť {{ name }}</button>
+            <button>Zapnúť {{ name }}</button>
         </form>
     {% endfor %}
-    <br>
     <a href="/logout">Odhlásiť</a>
 </body>
 </html>

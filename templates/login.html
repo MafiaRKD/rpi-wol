@@ -1,13 +1,33 @@
 <!doctype html>
-<html>
+<html lang="sk">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prihlásenie - Wake on LAN</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        input {
+            font-size: 1.2em;
+            padding: 0.5em;
+            width: 90%;
+            max-width: 300px;
+            margin-bottom: 1em;
+        }
+        button {
+            font-size: 1.2em;
+            padding: 0.5em 1em;
+        }
+    </style>
 </head>
-<body style="text-align: center; font-family: sans-serif;">
+<body>
     <h2>🔐 Prihlásenie</h2>
     <form method="post">
-        <input type="text" name="username" placeholder="Meno" required><br><br>
-        <input type="password" name="password" placeholder="Heslo" required><br><br>
+        <input type="text" name="username" placeholder="Meno" required><br>
+        <input type="password" name="password" placeholder="Heslo" required><br>
         <button type="submit">Prihlásiť</button>
     </form>
     {% if error %}
