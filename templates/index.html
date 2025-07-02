@@ -25,6 +25,16 @@
             margin: 0.5em auto;
             display: block;
         }
+        .status {
+            font-size: 0.9em;
+            color: gray;
+        }
+        .online {
+            color: green;
+        }
+        .offline {
+            color: red;
+        }
         a {
             display: block;
             margin-top: 20px;
@@ -36,10 +46,15 @@
 </head>
 <body>
     <h1>🖥️ Zapnutie zariadení</h1>
-    {% for name, mac in devices.items() %}
-        <form action="/wake/{{ name }}">
-            <button>Zapnúť {{ name }}</button>
-        </form>
+    {% for name, info in devices.items() %}
+        <div>
+            <form action="/wake/{{ name }}">
+                <button>Zapnúť {{ name }}</button>
+            </form>
+            <div class="status {{ 'online' if info.online else 'offline' }}">
+                {% if info.online %}🟢 Online{% else %}🔴 Offline{% endif %}
+            </div>
+        </div>
     {% endfor %}
     <a href="/logout">Odhlásiť</a>
 </body>
