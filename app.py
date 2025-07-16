@@ -31,6 +31,17 @@ def is_online(ip):
     except:
         return False
 
+def get_cpu_temp():
+    try:
+        output = subprocess.check_output(["vcgencmd", "measure_temp"]).decode()
+        if "temp=" in output:
+            temp = output.strip().replace("temp=", "")
+            print("Teplota CPU:", temp)
+            return temp
+    except Exception as e:
+        print("Chyba pri čítaní teploty:", e)
+    return "Neznáma"
+
 @app.route("/", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -53,7 +64,8 @@ def index():
             "online": is_online(ip) if ip else False
         }
 
-    return render_template("index.html", devices=status_info)
+    cpu_temp = get_cpu_temp()
+    return render_template("index.html", devices=status_info, cpu_temp=cpu_temp)
 
 @app.route("/wake/<device_name>")
 def wake(device_name):
