@@ -12,10 +12,12 @@
         }
         h1 {
             font-size: 1.8em;
-            margin-bottom: 1em;
+            margin-bottom: 0.5em;
         }
-        form {
-            margin: 10px;
+        p {
+            font-size: 1em;
+            margin-bottom: 1.5em;
+            color: #555;
         }
         button {
             font-size: 1.2em;
@@ -27,7 +29,6 @@
         }
         .status {
             font-size: 0.9em;
-            color: gray;
         }
         .online {
             color: green;
@@ -46,6 +47,8 @@
 </head>
 <body>
     <h1>🖥️ Zapnutie zariadení</h1>
+    <p>🌡️ Teplota CPU: <strong>{{ cpu_temp }}</strong></p>
+
     {% for name, info in devices.items() %}
         <div>
             <form action="/wake/{{ name }}">
