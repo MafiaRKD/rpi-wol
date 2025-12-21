@@ -7,16 +7,24 @@ app.secret_key = 'supersecretkey'
 
 devices = {
     "Herný PC": {
-        "mac": "DC:A6:32:BC:12:9F",
-        "ip": "192.168.0.101"
+        "mac": "AA:BB:CC:DD:EE:FF",
+        "wol_ip": "192.168.0.100",
+        "check_ip": "192.168.0.100"
     },
     "Server": {
-        "mac": "00:11:22:33:44:55",
-        "ip": "192.168.0.102"
+        "mac": "AA:BB:CC:DD:EE:FF",
+        "wol_ip": "192.168.0.101",
+        "check_ip": "192.168.0.101"
     },
-    "Notebook": {
-        "mac": "66:77:88:99:AA:BB",
-        "ip": "192.168.0.103"
+    "ProxMox": {
+        "mac": "AA:BB:CC:DD:EE:FF",
+        "wol_ip": "192.168.0.100",
+        "check_ip": "192.168.0.103"
+    },
+    "Xubuntu": {
+        "mac": "AA:BB:CC:DD:EE:FF",
+        "wol_ip": "192.168.0.100",      # WoL posielame na ProxMox
+        "check_ip": "192.168.0.250"   # skutočná IP VM-ky
     }
 }
 
@@ -58,22 +66,33 @@ def index():
 
     status_info = {}
     for name, info in devices.items():
-        ip = info.get("ip")
+        check_ip = info.get("check_ip")
+        wol_ip = info.get("wol_ip")  # zatiaľ nepoužívame, ale máme ho pripravený
+
+        # Kontrola online stavu podľa check_ip
+        online = is_online(check_ip) if check_ip else False
+
         status_info[name] = {
             "mac": info["mac"],
-            "online": is_online(ip) if ip else False
+            "online": online,
+            "wol_ip": wol_ip  # ak by si chcel neskôr niečo špeciálne
         }
 
     cpu_temp = get_cpu_temp()
+    print("cpu_temp premenná:", cpu_temp)  # debug print
     return render_template("index.html", devices=status_info, cpu_temp=cpu_temp)
 
 @app.route("/wake/<device_name>")
 def wake(device_name):
     if not session.get("logged_in"):
         return redirect(url_for("login"))
+    
     device = devices.get(device_name)
-    if device:
-        subprocess.run(["wakeonlan", device["mac"]])
+    if device and "wol_ip" in device:
+        # Wake-on-LAN posielame na správnu IP (väčšinou broadcast, ale wakeonlan to zvládne)
+        subprocess.run(["wakeonlan", "-i", device["wol_ip"], device["mac"]])
+        # Poznámka: -i parameter nie je povinný, wakeonlan defaultne posiela na broadcast,
+        # ale ak máš problémy, môžeš špecifikovať -i 192.168.0.255 alebo podobné
     return redirect(url_for("index"))
 
 @app.route("/logout")
