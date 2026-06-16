@@ -74,3 +74,20 @@ rpi-wol/
 
 - Zabezpečiť prístup cez firewall alebo VPN
 - Voliteľne: pridať HTTPS (napr. cez Nginx + certbot)
+
+## 🔒 Troubleshooting Wake-on-LAN
+
+Niektoré sieťové karty (napr. Realtek Gaming 2.5GbE po výmene základnej dosky)
+nemusia reagovať na magic packet poslaný na vlastnú IP adresu.
+
+Namiesto:
+
+wol_ip = 192.168.0.x
+
+použite broadcast adresu siete:
+
+wol_ip = 192.168.0.255
+
+alebo
+
+wol_ip = 255.255.255.255
