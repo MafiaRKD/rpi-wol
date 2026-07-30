@@ -1,93 +1,178 @@
-# Wake-on-LAN Web Interface pre Raspberry Pi
+# Homelab Dashboard
 
-Jednoduché a bezpečné webové rozhranie pre zapínanie viacerých počítačov cez Wake-on-LAN (WOL) pomocou Raspberry Pi.
+A lightweight Flask dashboard for Raspberry Pi and other Linux systems.
 
-## 🔧 Funkcie
+Originally created as a simple Wake-on-LAN utility, the project has evolved into a modular dashboard for monitoring and managing homelab devices.
 
-- 🖥 Zapínanie viacerých PC v sieti (MAC adresy)
-- 🔐 Ochrana heslom
-- 🔁 Automatické spustenie ako systemd služba
-- 💡 Funguje na Raspberry Pi 2, 3, 4 (alebo inom Linuxe)
+> **Current version:** 2.0.0
 
-## 🛠️ Inštalácia
+---
 
-### 1. Závislosti
+## Features
+
+- Wake-on-LAN for multiple devices
+- Live online/offline status monitoring
+- CPU temperature monitoring
+- NUT UPS integration
+- Modern dark user interface
+- AJAX-based dashboard (no page reloads)
+- Simple authentication
+- Modular service architecture
+- Lightweight Flask backend
+- Optimized for Raspberry Pi
+
+---
+
+## Screenshot
+
+![Homelab Dashboard](docs/screenshot.png)
+
+---
+
+## Requirements
+
+- Raspberry Pi OS (recommended)
+- Python 3.10 or newer
+- Flask
+- wakeonlan
+- Network UPS Tools (NUT) client *(optional)*
+
+All Python dependencies are listed in `requirements.txt`.
+
+---
+
+## Installation
+
+Clone the repository:
 
 ```bash
-sudo apt update
-sudo apt install wakeonlan python3-flask unzip git -y
-```
-
-### 2. Stiahnutie a spustenie
-
-```bash
-cd ~
-git clone https://github.com/MafiaRKD/rpi-wol.git
+git clone https://github.com/<YOUR_USERNAME>/rpi-wol.git
 cd rpi-wol
 ```
 
-> 📝 Uprav súbor `app.py` – zmeň:
-> - MAC adresy zariadení v `devices = {...}`
-> - prihlasovacie údaje (`USERNAME`, `PASSWORD`)
-
-### 3. Spustenie služby
+Create a virtual environment:
 
 ```bash
-sudo cp wol-web.service /etc/systemd/system/
-sudo nano /etc/systemd/system/wol-web.service
+python3 -m venv .venv
 ```
-- zmen User="Tvoj Pi User"
-- zmen ExecStart=/usr/bin/python3 /home/pi/rpi-wol/app.py - Tvoj Pi user
-- zmen WorkingDirectory=/home/pi/rpi-wol - Tvoj Pi user
+
+Activate it:
+
+Linux
+
 ```bash
-sudo systemctl daemon-reexec
-sudo systemctl daemon-reload
-sudo systemctl enable wol-web
-sudo systemctl start wol-web
+source .venv/bin/activate
 ```
 
-### 4. Použitie
+Windows
 
-Otvor prehliadač:
-
-```
-http://<IP_Raspberry_Pi>:5000
+```powershell
+.venv\Scripts\activate
 ```
 
-## 🔐 Prihlásenie
+Install dependencies:
 
-- Meno: `admin`
-- Heslo: `tajneheslo` *(zmeň v `app.py` pred použitím!)*
-
-## 📂 Štruktúra projektu
-
-```
-rpi-wol/
-├── app.py
-├── wol-web.service
-└── templates/
-    ├── index.html
-    └── login.html
+```bash
+pip install -r requirements.txt
 ```
 
-## 🔒 Odporúčania
+---
 
-- Zabezpečiť prístup cez firewall alebo VPN
-- Voliteľne: pridať HTTPS (napr. cez Nginx + certbot)
+## Configuration
 
-## 🔒 Troubleshooting Wake-on-LAN
+Copy the example configuration:
 
-Niektoré sieťové karty (napr. Realtek Gaming 2.5GbE po výmene základnej dosky)
-nemusia reagovať na magic packet poslaný na vlastnú IP adresu.
+```bash
+cp config.example.json config.json
+```
 
-Namiesto:
+or on Windows:
 
-wol_ip = 192.168.0.x
+```powershell
+copy config.example.json config.json
+```
 
-použite broadcast adresu siete:
+Edit `config.json` and configure:
 
-wol_ip = 192.168.0.255
+- application title
+- secret key
+- login credentials
+- Wake-on-LAN broadcast address
+- monitored devices
+- UPS connection (optional)
 
-alebo
+---
 
-wol_ip = 255.255.255.255
+## Running
+
+Start the application:
+
+```bash
+python app.py
+```
+
+By default the dashboard is available at:
+
+```
+http://<raspberrypi-ip>:5000
+```
+
+---
+
+## Updating
+
+Pull the latest version:
+
+```bash
+git pull
+```
+
+Install updated dependencies if required:
+
+```bash
+pip install -r requirements.txt
+```
+
+Restart the application or systemd service.
+
+---
+
+## Project Structure
+
+```
+api/
+services/
+static/
+    css/
+    js/
+templates/
+
+app.py
+config.py
+config.example.json
+requirements.txt
+```
+
+---
+
+## Roadmap
+
+Planned features for future releases:
+
+- Docker support
+- Multiple UPS support
+- Network statistics
+- Historical graphs
+- Service monitoring
+- Plugin architecture
+- Mobile UI improvements
+- Dashboard widgets
+- Theme customization
+
+---
+
+## License
+
+This project is licensed under the MIT License.
+
+See the LICENSE file for details.
