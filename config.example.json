@@ -1,0 +1,43 @@
+{
+    "app": {
+        "title": "Homelab Dashboard",
+        "version": "2.0.0",
+        "secret_key": "change_this_secret_key"
+    },
+
+    "auth": {
+        "username": "admin",
+        "password": "change_me"
+    },
+
+    "wake_on_lan": {
+        "broadcast": "192.168.0.255"
+    },
+
+    "devices": [
+        {
+            "id": "gaming-pc",
+            "name": "Herný PC",
+            "mac": "AA:BB:CC:DD:EE:FF",
+            "check_ip": "192.168.0.8"
+        },
+        {
+            "id": "truenas",
+            "name": "TrueNAS",
+            "mac": "AA:BB:CC:DD:EE:FF",
+            "check_ip": "192.168.0.2"
+        },
+        {
+            "id": "proxmox",
+            "name": "Proxmox",
+            "mac": "AA:BB:CC:DD:EE:FF",
+            "check_ip": "192.168.0.3"
+        }
+    ],
+
+    "ups": {
+        "enabled": false,
+        "host": "192.168.0.2",
+        "name": "ups"
+    }
+}

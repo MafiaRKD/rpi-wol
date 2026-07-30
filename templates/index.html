@@ -1,64 +1,72 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="sk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wake on LAN</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            text-align: center;
-            padding: 20px;
-        }
-        h1 {
-            font-size: 1.8em;
-            margin-bottom: 0.5em;
-        }
-        p {
-            font-size: 1em;
-            margin-bottom: 1.5em;
-            color: #555;
-        }
-        button {
-            font-size: 1.2em;
-            padding: 1em;
-            width: 90%;
-            max-width: 300px;
-            margin: 0.5em auto;
-            display: block;
-        }
-        .status {
-            font-size: 0.9em;
-        }
-        .online {
-            color: green;
-        }
-        .offline {
-            color: red;
-        }
-        a {
-            display: block;
-            margin-top: 20px;
-            font-size: 1em;
-            color: #333;
-            text-decoration: none;
-        }
-    </style>
-</head>
-<body>
-    <h1>🖥️ Zapnutie zariadení</h1>
-    <p>🌡️ Teplota CPU: <strong>{{ cpu_temp }}</strong></p>
 
-    {% for name, info in devices.items() %}
-        <div>
-            <form action="/wake/{{ name }}">
-                <button>Zapnúť {{ name }}</button>
-            </form>
-            <div class="status {{ 'online' if info.online else 'offline' }}">
-                {% if info.online %}🟢 Online{% else %}🔴 Offline{% endif %}
-            </div>
-        </div>
-    {% endfor %}
-    <a href="/logout">Odhlásiť</a>
+    <title>{{ app_title }}</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<h1>{{ app_title }}</h1>
+<div class="version">Version {{ app_version }}</div>
+
+<div class="cpu">
+    🌡️ CPU:
+    <strong id="cpu-temp">{{ cpu_temp }}</strong>
+</div>
+
+<div class="ups" id="ups-card" style="display:none;">
+
+    <h3>⚡ UPS</h3>
+
+    <table>
+        <tr><td>Status</td><td id="ups-status">-</td></tr>
+        <tr><td>Batéria</td><td id="ups-battery">-</td></tr>
+        <tr><td>Runtime</td><td id="ups-runtime">-</td></tr>
+        <tr><td>Zaťaženie</td><td id="ups-load">-</td></tr>
+        <tr><td>Input</td><td id="ups-input">-</td></tr>
+        <tr><td>Output</td><td id="ups-output">-</td></tr>
+    </table>
+
+</div>
+
+{% for device in devices %}
+
+<div class="device">
+
+    <button
+        id="wake-{{ device.id }}"
+        class="wake-button"
+        data-device-id="{{ device.id }}">
+        Zapnúť {{ device.name }}
+    </button>
+
+    <div
+        id="status-{{ device.id }}"
+        class="status {% if device.online %}online{% else %}offline{% endif %}">
+        {% if device.online %}
+            🟢 Online
+        {% else %}
+            🔴 Offline
+        {% endif %}
+    </div>
+
+</div>
+
+{% endfor %}
+
+<div class="logout">
+    <a href="{{ url_for('logout') }}">
+        Odhlásiť
+    </a>
+</div>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
 </body>
 </html>

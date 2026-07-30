@@ -1,0 +1,105 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+    background: #121212;
+    color: #f2f2f2;
+}
+
+h1 {
+    margin-bottom: 5px;
+}
+
+.version {
+    color: #999;
+    margin-bottom: 25px;
+    font-size: 14px;
+}
+
+.cpu {
+    margin-bottom: 30px;
+    font-size: 18px;
+}
+
+.device,
+.ups {
+    background: #1e1e1e;
+    border-radius: 12px;
+    max-width: 380px;
+    margin: 15px auto;
+    padding: 20px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, .45);
+}
+
+.ups {
+    text-align: left;
+}
+
+.ups h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.ups table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.ups td {
+    padding: 6px 0;
+    border-bottom: 1px solid #333;
+}
+
+.ups td:last-child {
+    text-align: right;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    font-size: 17px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #2196f3;
+    color: white;
+    transition: background .2s;
+}
+
+button:hover:not(:disabled) {
+    background: #1976d2;
+}
+
+button:disabled {
+    background: #555;
+    color: #bbb;
+    cursor: default;
+}
+
+.status {
+    margin-top: 12px;
+    font-weight: bold;
+}
+
+.online {
+    color: #4caf50;
+}
+
+.offline {
+    color: #f44336;
+}
+
+.logout {
+    margin-top: 35px;
+}
+
+.logout a {
+    color: #9ecbff;
+    text-decoration: none;
+}
+
+.logout a:hover {
+    text-decoration: underline;
+}

@@ -1,104 +1,134 @@
-from flask import Flask, render_template, request, redirect, url_for, session
-import subprocess
-import platform
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+
+from config import CONFIG
+from services.wol import wake
+from services.network import is_online
+from services.system import get_cpu_temp
+from api.status import get_status
 
 app = Flask(__name__)
-app.secret_key = 'supersecretkey'
+app.secret_key = CONFIG["app"]["secret_key"]
 
-devices = {
-    "Herný PC": {
-        "mac": "AA:BB:CC:DD:EE:FF",
-        "wol_ip": "192.168.0.100",
-        "check_ip": "192.168.0.100"
-    },
-    "Server": {
-        "mac": "AA:BB:CC:DD:EE:FF",
-        "wol_ip": "192.168.0.101",
-        "check_ip": "192.168.0.101"
-    },
-    "ProxMox": {
-        "mac": "AA:BB:CC:DD:EE:FF",
-        "wol_ip": "192.168.0.100",
-        "check_ip": "192.168.0.103"
-    },
-    "Xubuntu": {
-        "mac": "AA:BB:CC:DD:EE:FF",
-        "wol_ip": "192.168.0.100",      # WoL posielame na ProxMox
-        "check_ip": "192.168.0.250"   # skutočná IP VM-ky
-    }
-}
+DEVICES = CONFIG["devices"]
 
-USERNAME = "admin"
-PASSWORD = "tajneheslo"
 
-def is_online(ip):
-    param = "-n" if platform.system().lower() == "windows" else "-c"
-    try:
-        result = subprocess.run(["ping", param, "1", ip], stdout=subprocess.DEVNULL)
-        return result.returncode == 0
-    except:
-        return False
+def get_device(device_id):
+    for device in DEVICES:
+        if device["id"] == device_id:
+            return device
 
-def get_cpu_temp():
-    try:
-        output = subprocess.check_output(["vcgencmd", "measure_temp"]).decode()
-        if "temp=" in output:
-            temp = output.strip().replace("temp=", "")
-            print("Teplota CPU:", temp)
-            return temp
-    except Exception as e:
-        print("Chyba pri čítaní teploty:", e)
-    return "Neznáma"
+    return None
+
+
+def get_devices_status():
+    devices = []
+
+    for device in DEVICES:
+        devices.append(
+            {
+                "id": device["id"],
+                "name": device["name"],
+                "online": is_online(device["check_ip"]),
+            }
+        )
+
+    return devices
+
 
 @app.route("/", methods=["GET", "POST"])
 def login():
+    if session.get("logged_in"):
+        return redirect(url_for("index"))
+
+    error = None
+
     if request.method == "POST":
-        if request.form["username"] == USERNAME and request.form["password"] == PASSWORD:
+        if (
+            request.form["username"] == CONFIG["auth"]["username"]
+            and request.form["password"] == CONFIG["auth"]["password"]
+        ):
             session["logged_in"] = True
             return redirect(url_for("index"))
-        return render_template("login.html", error="Zlé meno alebo heslo.")
-    return render_template("login.html")
+
+        error = "Nesprávne používateľské meno alebo heslo."
+
+    return render_template(
+        "login.html",
+        error=error,
+        app_title=CONFIG["app"]["title"],
+        app_version=CONFIG["app"]["version"],
+    )
+
 
 @app.route("/home")
 def index():
     if not session.get("logged_in"):
         return redirect(url_for("login"))
 
-    status_info = {}
-    for name, info in devices.items():
-        check_ip = info.get("check_ip")
-        wol_ip = info.get("wol_ip")  # zatiaľ nepoužívame, ale máme ho pripravený
+    return render_template(
+        "index.html",
+        app_title=CONFIG["app"]["title"],
+        app_version=CONFIG["app"]["version"],
+        devices=get_devices_status(),
+        cpu_temp=get_cpu_temp(),
+    )
 
-        # Kontrola online stavu podľa check_ip
-        online = is_online(check_ip) if check_ip else False
 
-        status_info[name] = {
-            "mac": info["mac"],
-            "online": online,
-            "wol_ip": wol_ip  # ak by si chcel neskôr niečo špeciálne
-        }
+@app.route("/api/status")
+def api_status():
+    if not session.get("logged_in"):
+        return "", 401
 
-    cpu_temp = get_cpu_temp()
-    print("cpu_temp premenná:", cpu_temp)  # debug print
-    return render_template("index.html", devices=status_info, cpu_temp=cpu_temp)
+    return get_status()
 
-@app.route("/wake/<device_name>")
-def wake(device_name):
+
+# -------- NOVÝ AJAX endpoint --------
+
+@app.route("/api/wake/<device_id>", methods=["POST"])
+def api_wake(device_id):
+    if not session.get("logged_in"):
+        return jsonify({"success": False}), 401
+
+    device = get_device(device_id)
+
+    if device is None:
+        return jsonify({"success": False}), 404
+
+    wake(
+        device["mac"],
+        CONFIG["wake_on_lan"]["broadcast"],
+    )
+
+    return jsonify({"success": True})
+
+
+# -------- Starý endpoint ponechávame --------
+
+@app.route("/wake/<device_id>")
+def wake_device(device_id):
     if not session.get("logged_in"):
         return redirect(url_for("login"))
-    
-    device = devices.get(device_name)
-    if device and "wol_ip" in device:
-        # Wake-on-LAN posielame na správnu IP (väčšinou broadcast, ale wakeonlan to zvládne)
-        subprocess.run(["wakeonlan", "-i", device["wol_ip"], device["mac"]])
-        # Poznámka: -i parameter nie je povinný, wakeonlan defaultne posiela na broadcast,
-        # ale ak máš problémy, môžeš špecifikovať -i 192.168.0.255 alebo podobné
+
+    device = get_device(device_id)
+
+    if device:
+        wake(
+            device["mac"],
+            CONFIG["wake_on_lan"]["broadcast"],
+        )
+
     return redirect(url_for("index"))
+
 
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("login"))
 
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(
+        host="0.0.0.0",
+        port=5000,
+        debug=False,
+    )
