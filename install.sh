@@ -8,6 +8,7 @@ set -Eeuo pipefail
 
 APP_NAME="Homelab Dashboard"
 REPO_URL="https://github.com/MafiaRKD/rpi-wol.git"
+BRANCH="${RPI_WOL_BRANCH:-main}"
 SERVICE_NAME="wol-web.service"
 
 # ------------------------------------------------------------
@@ -253,7 +254,7 @@ fresh_install() {
 
     info "Cloning ${APP_NAME}..."
 
-    git clone "${REPO_URL}" "${INSTALL_DIR}"
+    git clone --branch "${BRANCH}" --single-branch "${REPO_URL}" "${INSTALL_DIR}"
 
     create_virtual_environment
     create_config_if_missing
@@ -287,9 +288,9 @@ update_installation() {
         exit 1
     fi
 
-    git fetch origin
-    git checkout main
-    git pull --ff-only origin main
+    git fetch origin "${BRANCH}"
+    git checkout "${BRANCH}"
+    git pull --ff-only origin "${BRANCH}"
 
     info "Updating Python dependencies..."
 
@@ -326,7 +327,7 @@ reinstall_application() {
     install_system_packages
 
     info "Cloning clean installation..."
-    git clone "${REPO_URL}" "${INSTALL_DIR}"
+    git clone --branch "${BRANCH}" --single-branch "${REPO_URL}" "${INSTALL_DIR}"
 
     create_virtual_environment
 
