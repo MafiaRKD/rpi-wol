@@ -141,12 +141,6 @@ async function refreshDashboard() {
             document.getElementById("ups-load").textContent =
                 `${data.ups.load} %`;
 
-            document.getElementById("ups-input").textContent =
-                `${data.ups.input_voltage} V`;
-
-            document.getElementById("ups-output").textContent =
-                `${data.ups.output_voltage} V`;
-
             if (data.ups.runtime) {
 
                 const runtime = parseInt(data.ups.runtime);

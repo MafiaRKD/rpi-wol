@@ -47,6 +47,4 @@ def get_ups_status():
         "battery": values.get("battery.charge"),
         "runtime": values.get("battery.runtime"),
         "load": values.get("ups.load"),
-        "input_voltage": values.get("input.voltage"),
-        "output_voltage": values.get("output.voltage"),
     }
