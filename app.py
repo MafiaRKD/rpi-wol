@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 
 from config import CONFIG
+from version import APP_VERSION
 from services.wol import wake
 from services.network import is_online
 from services.system import get_cpu_temp
@@ -56,7 +57,7 @@ def login():
         "login.html",
         error=error,
         app_title=CONFIG["app"]["title"],
-        app_version=CONFIG["app"]["version"],
+        app_version=APP_VERSION,
     )
 
 
@@ -68,7 +69,7 @@ def index():
     return render_template(
         "index.html",
         app_title=CONFIG["app"]["title"],
-        app_version=CONFIG["app"]["version"],
+        app_version=APP_VERSION,
         devices=get_devices_status(),
         cpu_temp=get_cpu_temp(),
     )
