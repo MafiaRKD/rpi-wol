@@ -1,5 +1,40 @@
 # Changelog
 
+## 2.0.1
+
+### Added
+
+- Automatic one-line installer
+- Existing installation detection
+- Installer Update mode
+- Installer Reinstall mode
+- Installer Uninstall mode
+- Automatic configuration backup before Reinstall
+- Automatic configuration backup before Uninstall
+- Automatic system package installation
+- Automatic Python virtual environment creation
+- Automatic systemd service configuration
+- Application version management through `version.py`
+- Homelab Dashboard logo
+- Browser favicon
+- Static asset cache busting based on application version
+
+### Changed
+
+- Application version is no longer stored in `config.json`
+- Updates now preserve user configuration independently of the application version
+- Installation process is fully automated
+- systemd service is automatically configured for the current Linux user
+- README installation and update instructions updated for the automatic installer
+- Dashboard and login page updated with Homelab Dashboard branding
+
+### Fixed
+
+- Prevented stale CSS and JavaScript files from being used after application updates
+- Fixed application version remaining outdated when preserving `config.json` during updates
+
+---
+
 ## 2.0.0
 
 ### Added

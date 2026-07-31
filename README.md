@@ -1,10 +1,10 @@
 # Homelab Dashboard
 
-A lightweight Flask dashboard for Raspberry Pi and other Linux systems.
+A lightweight Flask dashboard for Raspberry Pi and other Debian-based Linux systems.
 
 Originally created as a simple Wake-on-LAN utility, the project has evolved into a modular dashboard for monitoring and managing homelab devices.
 
-> **Current version:** 2.0.0
+> **Current version:** 2.0.1
 
 ---
 
@@ -21,6 +21,7 @@ Originally created as a simple Wake-on-LAN utility, the project has evolved into
 - Modular service architecture
 - Lightweight Flask backend
 - systemd support for automatic startup
+- Automatic installer, updater and uninstaller
 - Optimized for Raspberry Pi
 
 ---
@@ -31,106 +32,174 @@ Originally created as a simple Wake-on-LAN utility, the project has evolved into
 
 ---
 
+## Quick Installation
+
+The recommended installation method is the automatic installer.
+
+Run the following command as your normal Linux user:
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/MafiaRKD/rpi-wol/main/install.sh)"
+```
+
+Do not run the installer with `sudo`. It will request sudo privileges automatically when required.
+
+The installer automatically:
+
+- installs required system packages
+- clones the repository to `~/rpi-wol`
+- creates a Python virtual environment
+- installs Python dependencies
+- creates `config.json`
+- configures the systemd service for the current user
+- enables automatic startup
+- starts the dashboard
+
+After installation, open:
+
+```text
+http://<raspberry-pi-ip>:5000
+```
+
+Default login:
+
+```text
+Username: admin
+Password: change_me
+```
+
+Edit the configuration after installation:
+
+```bash
+nano ~/rpi-wol/config.json
+```
+
+At minimum, change:
+
+- secret key
+- username
+- password
+- Wake-on-LAN broadcast address
+- device names
+- device MAC addresses
+- device IP addresses
+
+Then restart the dashboard:
+
+```bash
+sudo systemctl restart wol-web.service
+```
+
+---
+
+## Installer Management
+
+Running the installer again detects the existing installation:
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/MafiaRKD/rpi-wol/main/install.sh)"
+```
+
+The following menu is displayed:
+
+```text
+Existing installation detected:
+  /home/<user>/rpi-wol
+
+1) Update
+2) Reinstall
+3) Uninstall
+4) Cancel
+```
+
+### Update
+
+Updates the application to the latest version while preserving the existing:
+
+```text
+config.json
+```
+
+The installer also updates Python dependencies, refreshes the systemd service and restarts the dashboard.
+
+If tracked application files contain local modifications, the update is cancelled to prevent accidentally overwriting them.
+
+### Reinstall
+
+Performs a clean application reinstall.
+
+Before removing the existing installation, the current configuration is backed up to:
+
+```text
+~/config.json.backup.YYYY-MM-DD_HH-MM-SS
+```
+
+The application is then installed again with a fresh default `config.json`.
+
+The backup is not restored automatically.
+
+### Uninstall
+
+Stops and removes:
+
+- Homelab Dashboard
+- `~/rpi-wol`
+- `wol-web.service`
+
+Before removal, the current configuration is backed up to:
+
+```text
+~/config.json.backup.YYYY-MM-DD_HH-MM-SS
+```
+
+System packages installed by the installer are intentionally left installed.
+
+---
+
 ## Requirements
 
 Recommended platform:
 
 - Raspberry Pi
 - Raspberry Pi OS / Debian-based Linux
-- Python 3.10 or newer
+- Internet connection
+- `curl`
+- normal user account with sudo access
+
+The automatic installer handles the remaining dependencies, including:
+
 - Git
+- Python 3
 - Python virtual environment support
-
-Optional:
-
-- Network UPS Tools (NUT) client for UPS monitoring
-
-Python dependencies such as Flask and wakeonlan are installed from `requirements.txt`.
-
----
-
-## Installation
-
-### 1. Install system dependencies
-
-Update the package list:
-
-```bash
-sudo apt update
-```
-
-Install Git, Python virtual environment support and pip:
-
-```bash
-sudo apt install git python3-venv python3-pip -y
-```
-
-If you want to use UPS monitoring, also install the NUT client:
-
-```bash
-sudo apt install nut-client -y
-```
-
----
-
-### 2. Clone the repository
-
-```bash
-cd ~
-git clone https://github.com/MafiaRKD/rpi-wol.git
-cd rpi-wol
-```
-
----
-
-### 3. Create a Python virtual environment
-
-```bash
-python3 -m venv .venv
-```
-
-Activate it:
-
-```bash
-source .venv/bin/activate
-```
-
-Install the required Python packages:
-
-```bash
-pip install -r requirements.txt
-```
+- pip
+- Network UPS Tools client
 
 ---
 
 ## Configuration
 
-Create your local configuration from the included example:
+The local configuration is stored in:
 
-```bash
-cp config.example.json config.json
+```text
+~/rpi-wol/config.json
 ```
 
-Edit it:
+The file is created automatically during installation from:
 
-```bash
-nano config.json
+```text
+config.example.json
 ```
 
-Configure your:
-
-- application title
-- secret key
-- login credentials
-- Wake-on-LAN broadcast address
-- monitored devices
-- UPS connection
-
-`config.json` is excluded from Git and will not be committed to the repository.
+`config.json` is excluded from Git and is preserved during normal updates.
 
 ### Device configuration
 
-Each monitored device requires an ID, display name, MAC address and IP address.
+Each monitored device requires:
+
+- ID
+- display name
+- MAC address
+- IP address
 
 Example:
 
@@ -143,7 +212,9 @@ Example:
 }
 ```
 
-The MAC address is used for Wake-on-LAN and `check_ip` is used for online/offline monitoring.
+The MAC address is used for Wake-on-LAN.
+
+`check_ip` is used for automatic online/offline monitoring.
 
 ---
 
@@ -160,7 +231,7 @@ The dashboard can display:
 
 The NUT server may run on another device, such as TrueNAS.
 
-Before enabling UPS monitoring in the dashboard, verify that the Raspberry Pi can communicate with your NUT server.
+Before enabling UPS monitoring, verify that the Raspberry Pi can communicate with the NUT server.
 
 Example:
 
@@ -168,144 +239,67 @@ Example:
 upsc ups@192.168.0.2
 ```
 
-A shorter diagnostic command can be used to display the values required by the dashboard:
+A shorter diagnostic command can display the values used by the dashboard:
 
 ```bash
 upsc ups@192.168.0.2 | grep -E "ups.status|battery.charge|battery.runtime|ups.load"
 ```
 
-Then configure the UPS section in `config.json` with the correct NUT server address and UPS name.
-
-If UPS monitoring is disabled or the NUT client is unavailable, the rest of the dashboard continues to operate normally.
-
----
-
-## Running as a systemd Service
-
-A systemd service template is included in:
+Then configure the UPS section in:
 
 ```text
-systemd/wol-web.service
+~/rpi-wol/config.json
 ```
 
-Before installing it, edit the service file:
-
-```bash
-nano systemd/wol-web.service
-```
-
-Replace every occurrence of:
-
-```text
-YOUR_USERNAME
-```
-
-with your Linux username.
-
-You can check your username with:
-
-```bash
-whoami
-```
-
-For example, if the username is `pi`, the relevant part of the service should look like:
-
-```ini
-[Service]
-Type=simple
-User=pi
-WorkingDirectory=/home/pi/rpi-wol
-ExecStart=/home/pi/rpi-wol/.venv/bin/python /home/pi/rpi-wol/app.py
-
-Environment=PYTHONUNBUFFERED=1
-
-Restart=always
-RestartSec=5
-```
-
-Install the service:
-
-```bash
-sudo cp systemd/wol-web.service /etc/systemd/system/wol-web.service
-```
-
-Reload systemd:
-
-```bash
-sudo systemctl daemon-reload
-```
-
-Enable automatic startup:
-
-```bash
-sudo systemctl enable wol-web.service
-```
-
-Start the dashboard:
-
-```bash
-sudo systemctl start wol-web.service
-```
-
-Check its status:
-
-```bash
-systemctl status wol-web.service
-```
-
-The service should report:
-
-```text
-Active: active (running)
-```
-
-Open the dashboard in your browser:
-
-```text
-http://<raspberry-pi-ip>:5000
-```
-
-The dashboard will now start automatically whenever the Raspberry Pi boots.
+If UPS monitoring is disabled or the NUT server is unavailable, the rest of the dashboard continues to operate normally.
 
 ---
 
 ## Service Management
 
-Restart the dashboard:
+The installer creates:
+
+```text
+/etc/systemd/system/wol-web.service
+```
+
+The service starts automatically when the system boots.
+
+Check status:
+
+```bash
+systemctl status wol-web.service
+```
+
+Restart:
 
 ```bash
 sudo systemctl restart wol-web.service
 ```
 
-Stop the dashboard:
+Stop:
 
 ```bash
 sudo systemctl stop wol-web.service
 ```
 
-Start the dashboard:
+Start:
 
 ```bash
 sudo systemctl start wol-web.service
-```
-
-Check the service status:
-
-```bash
-systemctl status wol-web.service
 ```
 
 ---
 
 ## Logs
 
-View the service logs:
+View service logs:
 
 ```bash
 journalctl -u wol-web.service
 ```
 
-Follow the logs live:
+Follow logs live:
 
 ```bash
 journalctl -u wol-web.service -f
@@ -319,45 +313,79 @@ journalctl -u wol-web.service -b
 
 ---
 
-## Updating
+## Manual Installation
 
-Go to the application directory:
+The automatic installer is recommended.
+
+For manual installation, install the required packages:
 
 ```bash
-cd ~/rpi-wol
+sudo apt update
+sudo apt install -y git python3 python3-venv python3-pip nut-client
 ```
 
-Pull the latest version:
+Clone the repository:
 
 ```bash
-git pull
+cd ~
+git clone https://github.com/MafiaRKD/rpi-wol.git
+cd rpi-wol
 ```
 
-Activate the virtual environment:
+Create the virtual environment:
 
 ```bash
+python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-Install or update Python dependencies:
+Install Python dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Restart the service:
+Create the configuration:
 
 ```bash
-sudo systemctl restart wol-web.service
+cp config.example.json config.json
+nano config.json
 ```
 
-Verify that the service started correctly:
+The systemd template is located at:
+
+```text
+systemd/wol-web.service
+```
+
+Replace every occurrence of:
+
+```text
+YOUR_USERNAME
+```
+
+with your Linux username.
+
+Install and enable the service:
+
+```bash
+sudo cp systemd/wol-web.service /etc/systemd/system/wol-web.service
+sudo systemctl daemon-reload
+sudo systemctl enable wol-web.service
+sudo systemctl start wol-web.service
+```
+
+Verify:
 
 ```bash
 systemctl status wol-web.service
 ```
 
-Your local `config.json` is ignored by Git and is preserved during normal updates.
+The dashboard should now be available at:
+
+```text
+http://<raspberry-pi-ip>:5000
+```
 
 ---
 
@@ -370,13 +398,17 @@ rpi-wol/
 ├── services/
 ├── static/
 │   ├── css/
-│   └── js/
+│   ├── js/
+│   ├── favicon.ico
+│   └── homelab-dashboard-logo.png
 ├── systemd/
 ├── templates/
 ├── app.py
 ├── config.py
 ├── config.example.json
+├── install.sh
 ├── requirements.txt
+├── version.py
 ├── CHANGELOG.md
 ├── LICENSE
 └── README.md
@@ -387,26 +419,38 @@ rpi-wol/
 - `app.py` — Flask application and routes
 - `api/` — dashboard API endpoints
 - `services/` — Wake-on-LAN, network, UPS and system services
-- `static/` — CSS and JavaScript
+- `static/` — CSS, JavaScript and branding assets
 - `templates/` — HTML templates
 - `config.py` — configuration loader
 - `config.json` — local configuration, not tracked by Git
 - `config.example.json` — example configuration
+- `version.py` — application version
+- `install.sh` — automatic installer and management script
 - `systemd/` — systemd service template
 
 ---
 
 ## Tested Platform
 
-Version 2.0.0 has been tested on a Raspberry Pi running Python 3.11 with:
+Version 2.0.1 has been tested on Raspberry Pi OS / Debian with Python 3.11.
 
-- automatic systemd startup
-- Python virtual environment
+The following installation and application functions have been tested:
+
+- fresh installation using the one-line installer
+- automatic installation of required system packages
+- Python virtual environment creation
+- automatic systemd service installation
+- automatic startup after Raspberry Pi reboot
+- installer Update
+- configuration preservation during Update
+- installer Reinstall
+- configuration backup during Reinstall
+- installer Uninstall
+- configuration backup during Uninstall
 - Wake-on-LAN
 - automatic device status monitoring
 - CPU temperature monitoring
 - remote NUT UPS monitoring
-- automatic startup after Raspberry Pi reboot
 
 ---
 
@@ -414,11 +458,20 @@ Version 2.0.0 has been tested on a Raspberry Pi running Python 3.11 with:
 
 The dashboard is intended primarily for trusted home networks.
 
+The default credentials are:
+
+```text
+Username: admin
+Password: change_me
+```
+
+**Change the default username, password and secret key after installation.**
+
 Do not expose the Flask development server directly to the public Internet.
 
 If remote access is required, use an appropriate secure reverse proxy, VPN or other protected access method.
 
-Keep `config.json` private because it contains local configuration and authentication credentials.
+Keep `config.json` and its backups private because they contain local configuration and authentication credentials.
 
 ---
 
