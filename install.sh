@@ -389,10 +389,6 @@ uninstall_application() {
 
 existing_installation_menu() {
     echo
-    echo "========================================"
-    echo " ${APP_NAME}"
-    echo "========================================"
-    echo
     echo "Existing installation detected:"
     echo "  ${INSTALL_DIR}"
     echo
