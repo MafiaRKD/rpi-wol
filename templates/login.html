@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>{{ app_title }}</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
     <style>
         body {
@@ -89,6 +90,14 @@
             color: #ff6b6b;
             font-weight: bold;
         }
+
+        .dashboard-logo {
+            display: block;
+            width: 220px;
+            height: 220px;
+            margin: 16px auto 12px;
+            border-radius: 22px;
+        }
     </style>
 </head>
 
@@ -97,6 +106,13 @@
 <div class="login-box">
 
     <h1>{{ app_title }}</h1>
+
+    <img
+    src="{{ url_for('static', filename='homelab-dashboard-logo.png') }}"
+    alt="Homelab Dashboard"
+    class="dashboard-logo"
+    >
+
     <div class="version">Version {{ app_version }}</div>
 
     <form method="post">

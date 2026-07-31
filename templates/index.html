@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>{{ app_title }}</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
@@ -13,6 +14,13 @@
 <body>
 
 <h1>{{ app_title }}</h1>
+
+<img
+    src="{{ url_for('static', filename='homelab-dashboard-logo.png') }}"
+    alt="Homelab Dashboard"
+    class="dashboard-logo"
+>
+
 <div class="version">Version {{ app_version }}</div>
 
 <div class="cpu">
